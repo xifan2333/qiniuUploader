@@ -27,10 +27,6 @@ class QiNiu():
         info = put_file(self.token, self.key, self.path)[1]
         return  f'{self.url}{json.loads(info.text_body)["key"]}' if info.status_code==200 else info.exception
 
-ak = "-FrVRtN6n86rbnw6iwLF8SZHHJ8mv2NNJNtNYYIL"
-sk = "6XraLGydOPzTtG3Yrs65e4VKPu2X7M-oXUg7PvDu"
-bucket="image"
-url = "http://images.xifan.fun/"
 
 
 
