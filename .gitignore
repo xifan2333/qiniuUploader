@@ -128,5 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-#environment
+# environment
 qiniuenv
+
+# vscode
+.vscode
