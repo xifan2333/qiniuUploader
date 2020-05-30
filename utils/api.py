@@ -5,11 +5,11 @@ import json
 
 
 class QiNiu():
-    def __init__(self, ak, sk, bucket, url):
+    def __init__(self, ak, sk, buckets, urls):
         self.ak = ak
         self.sk = sk
-        self.bucket = bucket
-        self.url = url
+        self.buckets = buckets
+        self.urls = urls
     def auth(self):
         self.q = Auth(self.ak, self.sk)
         return self

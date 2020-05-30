@@ -4,15 +4,17 @@ import json
 class Config():
     @staticmethod
     def get_config():
-        with open('./config.json', 'r') as f:
+        with open('./config.json', 'r',encoding='utf-8') as f:
             confing = json.load(f)
             return confing
 
-    def __init__(self, ak="", sk=""):
+    def __init__(self, ak="", sk="",buckets=[],urls=[],current_bucket='',current_url=''):
         self.ak = ak
         self.sk = sk
-        self.buckets = []
-        self.urls = []
+        self.buckets = buckets
+        self.urls = urls
+        self.current_bucket = current_bucket
+        self.current_url = current_url
 
     def add_buket(self, bucket):
         self.buckets.append(bucket)

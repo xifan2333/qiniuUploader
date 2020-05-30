@@ -8,6 +8,8 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from utils.config import Config
+from utils.api import QiNiu
 
 
 class Ui_MainWindow(object):
@@ -38,12 +40,14 @@ class Ui_MainWindow(object):
         self.textEdit_path = QtWidgets.QTextEdit(self.tab)
         self.textEdit_path.setObjectName("textEdit_path")
         self.gridLayout_4.addWidget(self.textEdit_path, 1, 1, 1, 1)
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.gridLayout_4.addItem(spacerItem, 2, 1, 1, 1)
         self.label_5 = QtWidgets.QLabel(self.tab)
         self.label_5.setObjectName("label_5")
         self.gridLayout_4.addWidget(self.label_5, 1, 0, 1, 1)
-        spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.gridLayout_4.addItem(spacerItem1, 0, 1, 1, 1)
         self.gridLayout_6.addLayout(self.gridLayout_4, 0, 0, 1, 1)
         self.tabWidget.addTab(self.tab, "")
@@ -67,7 +71,8 @@ class Ui_MainWindow(object):
         self.comboBox_buckets.setObjectName("comboBox_buckets")
         self.gridLayout_2.addWidget(self.comboBox_buckets, 2, 1, 1, 1)
         self.pushButton_reload_setting = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton_reload_setting.setObjectName("pushButton_reload_setting")
+        self.pushButton_reload_setting.setObjectName(
+            "pushButton_reload_setting")
         self.gridLayout_2.addWidget(self.pushButton_reload_setting, 4, 0, 1, 1)
         self.pushButton_add_bucket = QtWidgets.QPushButton(self.tab_2)
         self.pushButton_add_bucket.setObjectName("pushButton_add_bucket")
@@ -108,17 +113,47 @@ class Ui_MainWindow(object):
         self.pushButton_choose_file.setText(_translate("MainWindow", "选择文件"))
         self.pushButton_upload.setText(_translate("MainWindow", "上传"))
         self.label_5.setText(_translate("MainWindow", "上传文件"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "上传"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(
+            self.tab), _translate("MainWindow", "上传"))
         self.label.setText(_translate("MainWindow", "access key"))
         self.pushButton_add_url.setText(_translate("MainWindow", "增加"))
-        self.pushButton_reload_setting.setText(_translate("MainWindow", "重载设置"))
+        self.pushButton_reload_setting.setText(
+            _translate("MainWindow", "重载设置"))
         self.pushButton_add_bucket.setText(_translate("MainWindow", "增加"))
         self.pushButton_rm_url.setText(_translate("MainWindow", "删除"))
         self.label_4.setText(_translate("MainWindow", "存储空间名"))
         self.pushButton_rm_bucket.setText(_translate("MainWindow", "删除"))
         self.label_2.setText(_translate("MainWindow", "secret key"))
         self.label_3.setText(_translate("MainWindow", "自定义域名"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "设置"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(
+            self.tab_2), _translate("MainWindow", "设置"))
+
+    def readConfig(self):
+        self.conf = Config.get_config()
+        config = self.conf
+        self.lineEdit_ak.setText(config['ak'])
+        self.lineEdit_sk.setText(config['sk'])
+        self.comboBox_buckets.setCurrentText(config['current_bucket'])
+        self.comboBox_urls.setCurrentText(config['current_url'])
+        self.comboBox_buckets.addItems(config['buckets'])
+        self.comboBox_urls.addItems(config['urls'])
+        self.config = Config(ak=config['ak'], sk=config['sk'], buckets=config['buckets'], urls=config['urls'],
+                             current_bucket=config['current_bucket'], current_url=config['current_url'])
+
+    def removebucket(self):
+        self.comboBox_buckets.removeItem(0)
+        bucket = self.comboBox_buckets.currentText()
+        self.config.rm_bucket(bucket)
+        self.config.set_config()
+
+    def removebucketHandle(self):
+        self.pushButton_rm_bucket.clicked.connect(self.removebucket)
+        self.config.set_config()
+        
+
+    def setupEvents(self):
+        self.readConfig()
+        self.removebucketHandle()
 
 
 if __name__ == "__main__":
@@ -127,5 +162,6 @@ if __name__ == "__main__":
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
+    ui.setupEvents()
     MainWindow.show()
     sys.exit(app.exec_())
