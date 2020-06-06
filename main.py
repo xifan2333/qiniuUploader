@@ -10,6 +10,8 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from utils.config import Config
 from utils.api import QiNiu
+from components.add import dialog
+import os
 
 
 class Ui_MainWindow(object):
@@ -106,6 +108,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.textEdit_path.setAcceptDrops(True)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -135,25 +138,123 @@ class Ui_MainWindow(object):
         self.lineEdit_sk.setText(config['sk'])
         self.comboBox_buckets.setCurrentText(config['current_bucket'])
         self.comboBox_urls.setCurrentText(config['current_url'])
-        self.comboBox_buckets.addItems(config['buckets'])
-        self.comboBox_urls.addItems(config['urls'])
+        if config['buckets']:
+            self.comboBox_buckets.addItems(config['buckets'])
+        if config['urls']:
+            self.comboBox_urls.addItems(config['urls'])
         self.config = Config(ak=config['ak'], sk=config['sk'], buckets=config['buckets'], urls=config['urls'],
                              current_bucket=config['current_bucket'], current_url=config['current_url'])
 
-    def removebucket(self):
-        self.comboBox_buckets.removeItem(0)
+    def removeBucket(self):
         bucket = self.comboBox_buckets.currentText()
-        self.config.rm_bucket(bucket)
-        self.config.set_config()
+        if self.config.buckets:
+            self.config.rm_bucket(bucket)
+            self.config.set_config()
+            self.comboBox_buckets.removeItem(0)
+        else:
+            QtWidgets.QMessageBox(
+                QtWidgets.QMessageBox.Warning, "警告", "已无选项可删除").exec()
 
-    def removebucketHandle(self):
-        self.pushButton_rm_bucket.clicked.connect(self.removebucket)
-        self.config.set_config()
-        
+    def removeBucketHandle(self):
+        self.pushButton_rm_bucket.clicked.connect(self.removeBucket)
+
+    def removeUrl(self):
+        url = self.comboBox_urls.currentText()
+        if self.config.urls:
+            self.config.rm_url(url)
+            self.config.set_config()
+            self.comboBox_urls.removeItem(0)
+        else:
+            QtWidgets.QMessageBox(
+                QtWidgets.QMessageBox.Warning, "警告", "已无选项可删除").exec()
+
+    def removeUrlHandle(self):
+        self.pushButton_rm_url.clicked.connect(self.removeUrl)
+
+    def addBucket(self):
+        addDialog = QtWidgets.QDialog()
+        dig = dialog(addDialog)
+        addDialog.exec()
+        if addDialog.Accepted:
+            self.config.add_buket(dig.lineEdit.text())
+            self.config.set_config()
+            self.comboBox_buckets.addItem(dig.lineEdit.text())
+
+    def addBucketHandle(self):
+        self.pushButton_add_bucket.clicked.connect(self.addBucket)
+
+    def addUrl(self):
+        addDialog = QtWidgets.QDialog()
+        dig = dialog(addDialog)
+        addDialog.exec()
+        if addDialog.Accepted:
+            self.config.add_url(dig.lineEdit.text())
+            self.config.set_config()
+            self.comboBox_urls.addItem(dig.lineEdit.text())
+
+    def addUrlHandle(self):
+        self.pushButton_add_url.clicked.connect(self.addUrl)
+
+    def reloadSetting(self):
+        ak = self.lineEdit_ak.text()
+        sk = self.lineEdit_sk.text()
+        bucket = self.comboBox_buckets.currentText()
+        url = self.comboBox_urls.currentText()
+        self.config.set_config(ak, sk, bucket, url)
+        QtWidgets.QMessageBox(
+            QtWidgets.QMessageBox.Information, "提示", "配置已重载！").exec()
+
+    def reloadHandle(self):
+        self.pushButton_reload_setting.clicked.connect(self.reloadSetting)
+
+    def chooseFile(self):
+      
+        result = QtWidgets.QFileDialog.getOpenFileName()
+        if result:
+            self.textEdit_path.setPlainText(result[0])
+      
+    def chooseFileHandle(self):
+        self.pushButton_choose_file.clicked.connect(self.chooseFile)
+    
+    def upload(self):
+        ak = self.config.ak
+        sk =self.config.sk
+        bucket = self.config.current_bucket
+        url = self.config.current_url
+        path = self.textEdit_path.toPlainText()
+        if os.path.isfile(path):
+            path = path
+        else:
+            try:
+                path = path.split('file:///')[1]
+            except:
+                QtWidgets.QMessageBox(
+                QtWidgets.QMessageBox.Warning, "警告", "文件路径错误").exec()
+        try:
+            self.qiniu = QiNiu(ak,sk,bucket,url)
+            self.qiniu.auth().set_path(path)
+            self.qiniu.get_token()
+            result = self.qiniu.upload()
+            self.textEdit_path.setPlainText(result)
+            QtWidgets.QMessageBox(
+                QtWidgets.QMessageBox.Information, "提示", "上传成功！").exec()
+        except:
+                QtWidgets.QMessageBox(
+                QtWidgets.QMessageBox.Warning, "警告", "上传失败，请检查路径或配置有无错误").exec()
+    
+    def uploadHandle(self):
+        self.pushButton_upload.clicked.connect(self.upload)
+
 
     def setupEvents(self):
         self.readConfig()
-        self.removebucketHandle()
+        self.removeBucketHandle()
+        self.removeUrlHandle()
+        self.addBucketHandle()
+        self.addUrlHandle()
+        self.reloadHandle()
+        self.chooseFileHandle()
+        self.uploadHandle()
 
 
 if __name__ == "__main__":

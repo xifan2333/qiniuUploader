@@ -22,25 +22,20 @@ class Config():
     def rm_bucket(self, bucket):
         self.buckets.remove(bucket)
 
-    def set_current_bucket(self,i):
-        self.current_bucket = self.buckets[i]
 
     def add_url(self, url):
         self.urls.append(url)
 
     def rm_url(self, url):
-        self.buckets.remove(url)
-    
-    def set_current_url(self,i):
-        self.current_url=self.urls[i]
+        self.urls.remove(url)
 
-    def set_config(self):
-        self.config = {"ak": self.ak,
-                       "sk": self.sk,
+    def set_config(self,ak="",sk="",bucket="",url=""):
+        self.config = {"ak": ak or self.ak,
+                       "sk": sk or self.sk,
                        "buckets": self.buckets,
-                       "current_bucket":self.current_bucket,
+                       "current_bucket":bucket or self.current_bucket,
                        "urls":self.urls,
-                       "current_url":self.current_url
+                       "current_url":url or self.current_url
 
                        }
         with open('./config.json', 'w') as f:

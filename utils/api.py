@@ -5,18 +5,18 @@ import json
 
 
 class QiNiu():
-    def __init__(self, ak, sk, buckets, urls):
+    def __init__(self, ak, sk, bucket, url):
         self.ak = ak
         self.sk = sk
-        self.buckets = buckets
-        self.urls = urls
+        self.bucket = bucket
+        self.url= url
     def auth(self):
         self.q = Auth(self.ak, self.sk)
         return self
 
     def set_path(self, path):
         self.path = path
-        self.key = f'{int(time.time())}{os.path.basename(path)}'
+        self.key = f'{int(time.time())}-{os.path.basename(path)}'
         return self
 
     def get_token(self):
